@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* === ESSENTIAL CUSTOM STYLES === */
+/* Only styles that cannot be achieved with Tailwind CSS */
+
+/* Custom font */
+body {
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+}
+
+/* Custom keyframe animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Newsletter gradient background (specific gradient not available in Tailwind) */
+.newsletter-section {
+  background: linear-gradient(135deg, rgb(71, 85, 105) 0%, rgb(51, 65, 85) 100%);
+}
+
+/* Cart badge animation */
+.cart-badge {
+  animation: pulse 2s infinite;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Accessibility - focus states */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid rgb(4, 120, 87);
+  outline-offset: 2px;
+}
+
+*:focus {
+  outline: none;
+}
+
+/* === SECTION BACKGROUNDS === */
+/* Subtle background variations for better visual separation */
+
+/* Hero section - clean white */
+.hero-section {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* Dark mode hero section */
+.dark .hero-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* About section - very light emerald tint */
+.about-section {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+}
+
+/* Dark mode about section */
+.dark .about-section {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+}
+
+/* Best sellers - light gray with subtle gradient */
+.bestsellers-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* Dark mode best sellers */
+.dark .bestsellers-section {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+/* Features section - clean white */
+.features-section {
+  background: #ffffff;
+}
+
+/* Dark mode features section */
+.dark .features-section {
+  background: #0f172a;
+}
+
+/* Categories section - very light emerald tint */
+.categories-section {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+}
+
+/* Dark mode categories section */
+.dark .categories-section {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+}
+
+/* Newsletter section gradient */
+.newsletter-section {
+  background: linear-gradient(135deg, rgb(71, 85, 105) 0%, rgb(51, 65, 85) 100%);
+}
+
+/* Dark mode newsletter section - darker gradient */
+.dark .newsletter-section {
+  background: linear-gradient(135deg, rgb(30, 41, 59) 0%, rgb(15, 23, 42) 100%);
+}
