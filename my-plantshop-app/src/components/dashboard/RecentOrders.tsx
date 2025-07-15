@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface Order {
     id: string;
     customer: string;
     product: string;
-    amount: string;
+    usdAmount: number; // Changed to store USD amount as number
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     date: string;
 }
@@ -17,7 +18,7 @@ const mockOrders: Order[] = [
         id: '#1001',
         customer: 'Emily Johnson',
         product: 'Monstera Deliciosa',
-        amount: '$45.99',
+        usdAmount: 45.99,
         status: 'processing',
         date: '2 min ago'
     },
@@ -25,7 +26,7 @@ const mockOrders: Order[] = [
         id: '#1002',
         customer: 'Michael Chen',
         product: 'Snake Plant',
-        amount: '$29.99',
+        usdAmount: 29.99,
         status: 'shipped',
         date: '1 hour ago'
     },
@@ -33,7 +34,7 @@ const mockOrders: Order[] = [
         id: '#1003',
         customer: 'Sarah Davis',
         product: 'Fiddle Leaf Fig',
-        amount: '$89.99',
+        usdAmount: 89.99,
         status: 'delivered',
         date: '3 hours ago'
     },
@@ -41,7 +42,7 @@ const mockOrders: Order[] = [
         id: '#1004',
         customer: 'James Wilson',
         product: 'Peace Lily',
-        amount: '$34.99',
+        usdAmount: 34.99,
         status: 'pending',
         date: '5 hours ago'
     },
@@ -49,7 +50,7 @@ const mockOrders: Order[] = [
         id: '#1005',
         customer: 'Lisa Anderson',
         product: 'Rubber Plant',
-        amount: '$52.99',
+        usdAmount: 52.99,
         status: 'cancelled',
         date: '1 day ago'
     }
@@ -96,11 +97,12 @@ function StatusBadge({ status }: { status: Order['status'] }) {
 
 export function RecentOrders() {
     const { theme } = useTheme();
+    const { formatPrice } = useCurrency();
 
     return (
         <div className={`p-6 rounded-xl border ${theme === 'dark'
-                ? 'bg-gray-800 border-gray-700'
-                : 'bg-white border-gray-200'
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
             }`}>
             <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -108,8 +110,8 @@ export function RecentOrders() {
                     Recent Orders
                 </h3>
                 <button className={`text-sm font-medium transition-colors ${theme === 'dark'
-                        ? 'text-green-400 hover:text-green-300'
-                        : 'text-green-600 hover:text-green-500'
+                    ? 'text-green-400 hover:text-green-300'
+                    : 'text-green-600 hover:text-green-500'
                     }`}>
                     View all
                 </button>
@@ -120,8 +122,8 @@ export function RecentOrders() {
                     <div
                         key={order.id}
                         className={`flex items-center justify-between p-4 rounded-lg border transition-colors hover:bg-current/5 ${theme === 'dark'
-                                ? 'border-gray-700'
-                                : 'border-gray-100'
+                            ? 'border-gray-700'
+                            : 'border-gray-100'
                             }`}
                     >
                         <div className="flex items-center gap-4">
@@ -143,7 +145,7 @@ export function RecentOrders() {
                         <div className="text-right">
                             <p className={`font-semibold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'
                                 }`}>
-                                {order.amount}
+                                {formatPrice(order.usdAmount)}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                                 <StatusBadge status={order.status} />
@@ -160,8 +162,8 @@ export function RecentOrders() {
             <div className={`mt-6 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
                 }`}>
                 <button className={`w-full py-2 text-sm font-medium transition-colors rounded-lg ${theme === 'dark'
-                        ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}>
                     View all orders →
                 </button>

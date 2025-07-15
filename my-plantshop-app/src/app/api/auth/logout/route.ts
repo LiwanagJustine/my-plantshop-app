@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
     try {
-        // In a real app, you might want to:
-        // 1. Blacklist the JWT token
-        // 2. Clear session from database
-        // 3. Log the logout event
-
         // Create response
         const response = NextResponse.json({
             success: true,
@@ -26,9 +21,21 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Logout API error:', error);
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
+
+        // Even if there's an error, clear the cookie
+        const response = NextResponse.json({
+            success: true,
+            message: 'Logged out successfully'
+        });
+
+        response.cookies.set('auth-token', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax' as const,
+            maxAge: 0,
+            path: '/'
+        });
+
+        return response;
     }
 }

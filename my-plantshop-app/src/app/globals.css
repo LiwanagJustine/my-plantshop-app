@@ -103,3 +103,35 @@ a:focus-visible,
 .dark .newsletter-section {
   background: linear-gradient(135deg, rgb(30, 41, 59) 0%, rgb(15, 23, 42) 100%);
 }
+
+/* === MODAL Z-INDEX FIXES === */
+/* Force numbered icons and other dashboard elements to stay behind modals */
+
+/* Target the numbered badges in PopularProducts component */
+.absolute.-top-1.-right-1,
+[class*="absolute"][class*="-top-1"][class*="-right-1"],
+.absolute.-top-1.-right-1.w-6.h-6,
+div[class*="absolute"][class*="bg-blue-500"],
+.absolute.w-6.h-6,
+/* Also target any absolutely positioned elements that might appear over modals */
+.absolute[class*="bg-blue-500"],
+.absolute[class*="rounded-full"][class*="text-white"],
+/* General catch-all for trend icons and badges */
+.absolute:has(+ *),
+.relative .absolute {
+  z-index: 1 !important;
+}
+
+/* Ensure modal backdrops are always on top */
+div[style*="zIndex: 999999"],
+div[style*="zIndex: 9999999"],
+div[style*="zIndex: 99999999"] {
+  z-index: 999999 !important;
+}
+
+/* Force any absolutely positioned children in dashboard components to low z-index */
+.dashboard-content .absolute,
+.popular-products .absolute,
+[data-component="popular-products"] .absolute {
+  z-index: 1 !important;
+}

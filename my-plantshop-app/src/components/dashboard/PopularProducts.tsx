@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface Product {
     id: string;
     name: string;
-    price: string;
+    usdPrice: number; // Changed to store USD price as number
     sales: number;
     stock: number;
     image: string;
@@ -17,7 +18,7 @@ const mockProducts: Product[] = [
     {
         id: '1',
         name: 'Monstera Deliciosa',
-        price: '$45.99',
+        usdPrice: 45.99, // Store as number for conversion
         sales: 142,
         stock: 23,
         image: '🌿',
@@ -26,7 +27,7 @@ const mockProducts: Product[] = [
     {
         id: '2',
         name: 'Snake Plant',
-        price: '$29.99',
+        usdPrice: 29.99,
         sales: 89,
         stock: 45,
         image: '🐍',
@@ -35,7 +36,7 @@ const mockProducts: Product[] = [
     {
         id: '3',
         name: 'Fiddle Leaf Fig',
-        price: '$89.99',
+        usdPrice: 89.99,
         sales: 67,
         stock: 12,
         image: '🍃',
@@ -44,7 +45,7 @@ const mockProducts: Product[] = [
     {
         id: '4',
         name: 'Peace Lily',
-        price: '$34.99',
+        usdPrice: 34.99,
         sales: 54,
         stock: 31,
         image: '☮️',
@@ -53,7 +54,7 @@ const mockProducts: Product[] = [
     {
         id: '5',
         name: 'Rubber Plant',
-        price: '$52.99',
+        usdPrice: 52.99,
         sales: 43,
         stock: 8,
         image: '🌱',
@@ -100,20 +101,21 @@ function TrendIcon({ trend }: { trend: Product['trend'] }) {
 
 export function PopularProducts() {
     const { theme } = useTheme();
+    const { formatPrice } = useCurrency();
 
     return (
-        <div className={`p-6 rounded-xl border ${theme === 'dark'
-                ? 'bg-gray-800 border-gray-700'
-                : 'bg-white border-gray-200'
-            }`}>
+        <div className={`popular-products p-6 rounded-xl border ${theme === 'dark'
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
+            }`} data-component="popular-products">
             <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'
                     }`}>
                     Popular Products
                 </h3>
                 <button className={`text-sm font-medium transition-colors ${theme === 'dark'
-                        ? 'text-green-400 hover:text-green-300'
-                        : 'text-green-600 hover:text-green-500'
+                    ? 'text-green-400 hover:text-green-300'
+                    : 'text-green-600 hover:text-green-500'
                     }`}>
                     View all
                 </button>
@@ -124,8 +126,8 @@ export function PopularProducts() {
                     <div
                         key={product.id}
                         className={`flex items-center justify-between p-4 rounded-lg border transition-colors hover:bg-current/5 ${theme === 'dark'
-                                ? 'border-gray-700'
-                                : 'border-gray-100'
+                            ? 'border-gray-700'
+                            : 'border-gray-100'
                             }`}
                     >
                         <div className="flex items-center gap-4">
@@ -145,15 +147,15 @@ export function PopularProducts() {
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'
                                         }`}>
-                                        {product.price}
+                                        {formatPrice(product.usdPrice)}
                                     </span>
                                     <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                                         }`}>
                                         •
                                     </span>
                                     <span className={`text-xs ${product.stock < 15
-                                            ? theme === 'dark' ? 'text-red-400' : 'text-red-600'
-                                            : theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                        ? theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                                        : theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                                         }`}>
                                         {product.stock} in stock
                                     </span>
@@ -181,8 +183,8 @@ export function PopularProducts() {
             <div className={`mt-6 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
                 }`}>
                 <button className={`w-full py-2 text-sm font-medium transition-colors rounded-lg ${theme === 'dark'
-                        ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}>
                     View all products →
                 </button>

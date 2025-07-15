@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "../context/ThemeContext";
 import { LoadingProvider } from "../context/LoadingContext";
 import { AuthProvider } from "../context/AuthContext";
+import { CurrencyProvider } from "../context/CurrencyContext";
 import { themeInitScript } from "../lib/utils/theme-hydration";
 import "../lib/utils/devHelpers"; // Dev helper functions
 
@@ -40,7 +41,9 @@ export default function RootLayout({
                 <LoadingProvider>
                     <AuthProvider>
                         <ThemeProvider>
-                            {children}
+                            <CurrencyProvider>
+                                {children}
+                            </CurrencyProvider>
                         </ThemeProvider>
                     </AuthProvider>
                 </LoadingProvider>

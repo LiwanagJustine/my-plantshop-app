@@ -2,70 +2,76 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useNotifications } from '@/hooks/useNotifications';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { RegisterForm } from '@/components/auth/RegisterForm';
+import { NotificationContainer } from '@/components/ui/Notification';
 import { type RegisterFormData } from '@/lib/validations/auth';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { notifications, addNotification, removeNotification } = useNotifications();
     const [loading, setLoading] = useState(false);
 
     const handleRegister = async (data: RegisterFormData) => {
         setLoading(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            console.log('Registration attempt with:', {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email,
-                password: '***',
-                terms: data.terms,
+            // Call the actual registration API
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: `${data.firstName} ${data.lastName}`,
+                    email: data.email,
+                    password: data.password,
+                }),
             });
 
-            // TODO: Replace with actual registration logic
-            // Example:
-            // const response = await fetch('/api/auth/register', {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify({
-            //     firstName: data.firstName,
-            //     lastName: data.lastName,
-            //     email: data.email,
-            //     password: data.password,
-            //   }),
-            // });
-            // 
-            // if (response.ok) {
-            //   const result = await response.json();
-            //   // Handle successful registration
-            //   // Maybe auto-login or redirect to email verification
-            //   router.push('/auth/login?message=Account created successfully');
-            // } else {
-            //   // Handle registration error
-            //   throw new Error('Registration failed');
-            // }
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Registration successful:', result);
 
-            // For demo purposes, redirect to login page with success message
-            router.push('/auth/login?message=Account created successfully! Please sign in.');
+                // Show success notification without auto-redirect
+                addNotification({
+                    type: 'success',
+                    message: 'Account created successfully! Click "Sign in here" below to login with your new credentials.',
+                    duration: 10000, // 10 seconds to give user time to read
+                });
 
-        } catch (error) {
+                // No automatic redirect - user can navigate manually
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Registration failed');
+            }
+
+        } catch (error: any) {
             console.error('Registration failed:', error);
-            // TODO: Show error message to user
-            // You could use a toast library or state management for this
+            addNotification({
+                type: 'error',
+                message: error.message || 'Registration failed. Please try again.',
+                duration: 5000, // 5 seconds for error messages
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <AuthLayout
-            title="Create Account"
-            subtitle="Join PlantShop and start your green journey"
-        >
-            <RegisterForm onSubmit={handleRegister} loading={loading} />
-        </AuthLayout>
+        <>
+            <NotificationContainer
+                notifications={notifications}
+                onRemove={removeNotification}
+            />
+
+            <AuthLayout
+                title="Create Account"
+                subtitle="Join PlantShop and start your green journey"
+            >
+                <RegisterForm onSubmit={handleRegister} loading={loading} />
+            </AuthLayout>
+        </>
     );
 }

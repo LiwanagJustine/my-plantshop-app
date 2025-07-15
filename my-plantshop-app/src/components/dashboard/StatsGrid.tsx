@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface StatCardProps {
     title: string;
@@ -44,8 +45,8 @@ function StatCard({ title, value, change, changeType, icon }: StatCardProps) {
 
     return (
         <div className={`p-6 rounded-xl border transition-all hover:shadow-lg ${theme === 'dark'
-                ? 'bg-gray-800 border-gray-700 hover:shadow-gray-900/20'
-                : 'bg-white border-gray-200 hover:shadow-gray-200/50'
+            ? 'bg-gray-800 border-gray-700 hover:shadow-gray-900/20'
+            : 'bg-white border-gray-200 hover:shadow-gray-200/50'
             }`}>
             <div className="flex items-center justify-between">
                 <div>
@@ -63,8 +64,8 @@ function StatCard({ title, value, change, changeType, icon }: StatCardProps) {
                     </div>
                 </div>
                 <div className={`p-3 rounded-xl ${theme === 'dark'
-                        ? 'bg-green-900/20 text-green-400'
-                        : 'bg-green-50 text-green-600'
+                    ? 'bg-green-900/20 text-green-400'
+                    : 'bg-green-50 text-green-600'
                     }`}>
                     {icon}
                 </div>
@@ -74,10 +75,12 @@ function StatCard({ title, value, change, changeType, icon }: StatCardProps) {
 }
 
 export function StatsGrid() {
+    const { formatPrice } = useCurrency();
+
     const stats = [
         {
             title: 'Total Revenue',
-            value: '$12,426',
+            value: formatPrice(12426), // Converting $12,426 to current currency
             change: '+20.1% from last month',
             changeType: 'positive' as const,
             icon: (

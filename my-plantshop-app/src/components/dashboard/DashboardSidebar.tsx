@@ -18,7 +18,7 @@ const sidebarItems: SidebarItem[] = [
     {
         id: 'dashboard',
         label: 'Dashboard',
-        href: '/dashboard',
+        href: '/admin/dashboard',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -29,7 +29,7 @@ const sidebarItems: SidebarItem[] = [
     {
         id: 'products',
         label: 'Products',
-        href: '/dashboard/products',
+        href: '/admin/products',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -39,19 +39,25 @@ const sidebarItems: SidebarItem[] = [
             {
                 id: 'all-products',
                 label: 'All Products',
-                href: '/dashboard/products',
+                href: '/admin/products',
+                icon: <span className="w-2 h-2 rounded-full bg-current"></span>
+            },
+            {
+                id: 'add-product',
+                label: 'Add Product',
+                href: '/admin/products/add',
                 icon: <span className="w-2 h-2 rounded-full bg-current"></span>
             },
             {
                 id: 'categories',
                 label: 'Categories',
-                href: '/dashboard/products/categories',
+                href: '/admin/products/categories',
                 icon: <span className="w-2 h-2 rounded-full bg-current"></span>
             },
             {
                 id: 'inventory',
                 label: 'Inventory',
-                href: '/dashboard/products/inventory',
+                href: '/admin/products/inventory',
                 icon: <span className="w-2 h-2 rounded-full bg-current"></span>,
                 badge: '12'
             }
@@ -60,7 +66,7 @@ const sidebarItems: SidebarItem[] = [
     {
         id: 'orders',
         label: 'Orders',
-        href: '/dashboard/orders',
+        href: '/admin/orders',
         badge: '3',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +77,7 @@ const sidebarItems: SidebarItem[] = [
     {
         id: 'customers',
         label: 'Customers',
-        href: '/dashboard/customers',
+        href: '/admin/customers',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -81,7 +87,7 @@ const sidebarItems: SidebarItem[] = [
     {
         id: 'analytics',
         label: 'Analytics',
-        href: '/dashboard/analytics',
+        href: '/admin/analytics',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -104,13 +110,14 @@ export function DashboardSidebar() {
     };
 
     const isActive = (href: string) => {
-        return pathname === href || pathname?.startsWith(href + '/');
+        // Exact match only - no partial matching
+        return pathname === href;
     };
 
     return (
         <div className={`w-64 h-full flex flex-col border-r ${theme === 'dark'
-                ? 'bg-gray-800 border-gray-700'
-                : 'bg-white border-gray-200'
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
             }`}>
             {/* Logo/Brand */}
             <div className="flex items-center gap-3 p-6 border-b border-current/10">
@@ -124,7 +131,7 @@ export function DashboardSidebar() {
                     </h1>
                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                         }`}>
-                        Dashboard
+                        Admin Panel
                     </p>
                 </div>
             </div>
@@ -133,26 +140,25 @@ export function DashboardSidebar() {
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                 {sidebarItems.map((item) => (
                     <div key={item.id}>
-                        {/* Main Item */}
-                        <div className="relative">
+                        <div className="mb-1">
                             {item.subItems ? (
                                 <button
                                     onClick={() => toggleExpanded(item.id)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive(item.href)
-                                            ? theme === 'dark'
-                                                ? 'bg-green-900/50 text-green-400 border border-green-500/30'
-                                                : 'bg-green-50 text-green-700 border border-green-200'
-                                            : theme === 'dark'
-                                                ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        ? theme === 'dark'
+                                            ? 'bg-green-900/50 text-green-400 border border-green-500/30'
+                                            : 'bg-green-50 text-green-700 border border-green-200'
+                                        : theme === 'dark'
+                                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                         }`}
                                 >
                                     {item.icon}
                                     <span className="flex-1 text-left">{item.label}</span>
                                     {item.badge && (
                                         <span className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark'
-                                                ? 'bg-green-900 text-green-400'
-                                                : 'bg-green-100 text-green-700'
+                                            ? 'bg-green-900 text-green-400'
+                                            : 'bg-green-100 text-green-700'
                                             }`}>
                                             {item.badge}
                                         </span>
@@ -171,20 +177,20 @@ export function DashboardSidebar() {
                                 <Link
                                     href={item.href}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive(item.href)
-                                            ? theme === 'dark'
-                                                ? 'bg-green-900/50 text-green-400 border border-green-500/30'
-                                                : 'bg-green-50 text-green-700 border border-green-200'
-                                            : theme === 'dark'
-                                                ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        ? theme === 'dark'
+                                            ? 'bg-green-900/50 text-green-400 border border-green-500/30'
+                                            : 'bg-green-50 text-green-700 border border-green-200'
+                                        : theme === 'dark'
+                                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                         }`}
                                 >
                                     {item.icon}
                                     <span className="flex-1">{item.label}</span>
                                     {item.badge && (
                                         <span className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark'
-                                                ? 'bg-green-900 text-green-400'
-                                                : 'bg-green-100 text-green-700'
+                                            ? 'bg-green-900 text-green-400'
+                                            : 'bg-green-100 text-green-700'
                                             }`}>
                                             {item.badge}
                                         </span>
@@ -201,20 +207,20 @@ export function DashboardSidebar() {
                                         key={subItem.id}
                                         href={subItem.href}
                                         className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${isActive(subItem.href)
-                                                ? theme === 'dark'
-                                                    ? 'bg-green-900/30 text-green-400'
-                                                    : 'bg-green-50 text-green-700'
-                                                : theme === 'dark'
-                                                    ? 'text-gray-400 hover:bg-gray-700 hover:text-gray-300'
-                                                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                                            ? theme === 'dark'
+                                                ? 'bg-green-900/30 text-green-400'
+                                                : 'bg-green-50 text-green-700'
+                                            : theme === 'dark'
+                                                ? 'text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+                                                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
                                             }`}
                                     >
                                         {subItem.icon}
                                         <span className="flex-1">{subItem.label}</span>
                                         {subItem.badge && (
-                                            <span className={`px-1.5 py-0.5 text-xs rounded-full ${theme === 'dark'
-                                                    ? 'bg-red-900/50 text-red-400'
-                                                    : 'bg-red-100 text-red-600'
+                                            <span className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark'
+                                                ? 'bg-green-900 text-green-400'
+                                                : 'bg-green-100 text-green-700'
                                                 }`}>
                                                 {subItem.badge}
                                             </span>
@@ -226,24 +232,6 @@ export function DashboardSidebar() {
                     </div>
                 ))}
             </nav>
-
-            {/* Bottom Section */}
-            <div className={`p-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-                }`}>
-                <Link
-                    href="/settings"
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${theme === 'dark'
-                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>Settings</span>
-                </Link>
-            </div>
         </div>
     );
 }

@@ -1,49 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import pool from '@/lib/db';
 
 export async function GET(request: NextRequest) {
     try {
-        const token = request.cookies.get('auth-token')?.value;
+        console.log('🔥 /api/auth/me called');
+
+        // Get the token from cookie first
+        let token = request.cookies.get('auth-token')?.value;
+        console.log('🔥 Token from cookie:', token ? 'present' : 'missing');
+
+        // If no cookie token, try Authorization header (for localStorage fallback)
+        if (!token) {
+            const authHeader = request.headers.get('authorization');
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+                console.log('🔥 Token from Authorization header:', token ? 'present' : 'missing');
+            }
+        }
 
         if (!token) {
+            console.log('🚨 No token provided in cookie or header');
             return NextResponse.json(
-                { error: 'Not authenticated' },
+                { error: 'No token provided' },
                 { status: 401 }
             );
         }
 
-        // In a real app, you would:
-        // 1. Verify the JWT token
-        // 2. Check if token is blacklisted
-        // 3. Get user data from database
-
-        // Mock verification (extract user ID from mock token)
-        if (!token.startsWith('mock_jwt_')) {
-            return NextResponse.json(
-                { error: 'Invalid token' },
-                { status: 401 }
-            );
+        // Verify JWT token
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not configured');
         }
 
-        const userId = token.split('_')[2];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
+        console.log('🔥 Token decoded successfully for user:', decoded.userId);
 
-        // Mock user data - in real app, fetch from database
-        const mockUser = {
-            id: userId,
-            email: userId === '1' ? 'demo@plantshop.com' : 'admin@plantshop.com',
-            name: userId === '1' ? 'Demo User' : 'Admin User',
-            role: userId === '1' ? 'customer' : 'admin'
-        };
+        // Get user from database
+        const client = await pool.connect();
 
-        return NextResponse.json({
-            success: true,
-            user: mockUser
-        });
+        try {
+            const userQuery = 'SELECT id, email, name, user_role, created_at FROM users WHERE id = $1';
+            const userResult = await client.query(userQuery, [decoded.userId]);
+
+            if (userResult.rows.length === 0) {
+                return NextResponse.json(
+                    { error: 'User not found' },
+                    { status: 404 }
+                );
+            }
+
+            const user = userResult.rows[0];
+
+            // Use user_role from database
+            const role = user.user_role;
+
+            return NextResponse.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: role
+                }
+            });
+
+        } finally {
+            client.release();
+        }
 
     } catch (error) {
-        console.error('Auth check API error:', error);
+        console.error('Auth check error:', error);
         return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
+            { error: 'Invalid token' },
+            { status: 401 }
         );
     }
 }

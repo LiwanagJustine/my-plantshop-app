@@ -1,36 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const token = request.cookies.get('auth-token')?.value;
 
-    // Public routes that don't require authentication
-    const publicRoutes = ['/auth/login', '/auth/register', '/auth/forgot-password'];
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+    console.log(`🔥 MIDDLEWARE RUNNING: ${pathname}`);
 
-    // Protected routes that require authentication
-    const protectedRoutes = ['/dashboard', '/customer', '/profile', '/orders'];
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    // Protect admin routes - redirect to login if not authenticated
+    if (pathname.startsWith('/admin')) {
+        const token = request.cookies.get('auth-token')?.value;
 
-    // If accessing a protected route without a token, redirect to login
-    if (isProtectedRoute && !token) {
-        const loginUrl = new URL('/auth/login', request.url);
-        loginUrl.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(loginUrl);
+        if (!token) {
+            console.log('🚫 No auth token found, redirecting to login');
+            return NextResponse.redirect(new URL('/auth/login', request.url));
+        }
     }
 
-    // If accessing auth pages while already authenticated, redirect to dashboard
-    if (isPublicRoute && token && pathname !== '/auth/logout') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+    // Allow dashboard routes for backward compatibility (will redirect to admin)
+    if (pathname.startsWith('/dashboard')) {
+        const newPath = pathname.replace('/dashboard', '/admin');
+        console.log(`📍 Redirecting ${pathname} to ${newPath}`);
+        return NextResponse.redirect(new URL(newPath, request.url));
     }
 
-    // Allow the request to continue
     return NextResponse.next();
 }
 
 export const config = {
     matcher: [
-        // Match all paths except static files and api routes
+        // Match all paths except static files and api routes  
         '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$).*)',
     ],
 };
