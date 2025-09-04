@@ -11,15 +11,24 @@ import { DemoCredentials } from '@/components/auth/DemoCredentials';
 import { NotificationContainer } from '@/components/ui/Notification';
 import { type LoginFormData } from '@/lib/validations/auth';
 
-export default function LoginPage({ searchParams }: { searchParams: Record<string, string> }) {
+export default function LoginPage({
+    searchParams,
+}: {
+    searchParams: Record<string, string | string[] | undefined>;
+}) {
     const router = useRouter();
     const { login: authLogin, user } = useAuth();
     const { notifications, addNotification, removeNotification } = useNotifications();
     const [loading, setLoading] = useState(false);
 
-    // ✅ Now we read redirect & message directly from props
-    const redirectUrl = searchParams?.redirect || '/customer/dashboard';
-    const urlMessage = searchParams?.message;
+    // ✅ Safely extract values from searchParams
+    const redirectUrl =
+        typeof searchParams?.redirect === 'string'
+            ? searchParams.redirect
+            : '/customer/dashboard';
+
+    const urlMessage =
+        typeof searchParams?.message === 'string' ? searchParams.message : undefined;
 
     // If user is already logged in, redirect them
     useEffect(() => {
@@ -52,9 +61,10 @@ export default function LoginPage({ searchParams }: { searchParams: Record<strin
 
                 if (response.ok) {
                     const userData = await response.json();
-                    const targetUrl = userData.user.role === 'admin'
-                        ? '/admin/dashboard'
-                        : '/customer/dashboard';
+                    const targetUrl =
+                        userData.user.role === 'admin'
+                            ? '/admin/dashboard'
+                            : '/customer/dashboard';
                     window.location.href = `${currentOrigin}${targetUrl}`;
                 } else {
                     window.location.href = `${currentOrigin}/customer/dashboard`;
