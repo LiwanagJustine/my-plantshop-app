@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -14,7 +14,6 @@ import { type LoginFormData } from '@/lib/validations/auth';
 export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { theme } = useTheme();
     const { login: authLogin, user } = useAuth();
     const { notifications, addNotification, removeNotification } = useNotifications();
     const [loading, setLoading] = useState(false);

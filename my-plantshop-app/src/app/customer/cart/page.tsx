@@ -1,43 +1,23 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CustomerShopLayout } from '@/components/customer/CustomerShopLayout';
-import { mockPlants } from '@/data/plants';
-import { Plant } from '@/types/plant';
-
-interface CartItem {
-    plant: Plant;
-    quantity: number;
-}
+import { useCart } from '@/hooks/useCart';
 
 export default function CartPage() {
-    // Mock cart items - in real app this would come from context/state
-    const [cartItems, setCartItems] = useState<CartItem[]>([
-        { plant: mockPlants[0], quantity: 1 }, // Monstera Deliciosa
-        { plant: mockPlants[1], quantity: 2 }, // Snake Plant
-        { plant: mockPlants[4], quantity: 1 }, // Peace Lily
-    ]);
+    const { cartItems, removeFromCart, totalPrice, updateCartQuantity } = useCart();
 
-    const updateQuantity = (plantId: string, newQuantity: number) => {
+    const handleQuantityChange = async (cart_id: number, newQuantity: number) => {
         if (newQuantity <= 0) {
-            removeFromCart(plantId);
-            return;
+            removeFromCart(cart_id);
+        } else {
+            await updateCartQuantity(cart_id, newQuantity);
         }
-        setCartItems(prev =>
-            prev.map(item =>
-                item.plant.id === plantId
-                    ? { ...item, quantity: newQuantity }
-                    : item
-            )
-        );
-    };
-
-    const removeFromCart = (plantId: string) => {
-        setCartItems(prev => prev.filter(item => item.plant.id !== plantId));
     };
 
     const calculateSubtotal = () => {
-        return cartItems.reduce((total, item) => total + (item.plant.price * item.quantity), 0);
+        return totalPrice;
     };
 
     const subtotal = calculateSubtotal();
@@ -109,40 +89,39 @@ export default function CartPage() {
 
                                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                                     {cartItems.map((item) => (
-                                        <div key={item.plant.id} className="p-6">
+                                        <div key={item.cart_id} className="p-6">
                                             <div className="flex items-center space-x-4">
                                                 {/* Plant Image */}
                                                 <div className="flex-shrink-0">
                                                     <img
-                                                        src={item.plant.image}
-                                                        alt={item.plant.name}
+                                                        src={item.image}
+                                                        alt={item.plant_name}
                                                         className="w-20 h-20 object-cover rounded-lg"
                                                     />
                                                 </div>
-
                                                 {/* Plant Details */}
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                                                        {item.plant.name}
+                                                        {item.plant_name}
                                                     </h3>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                        {item.plant.scientificName}
+                                                        {item.scientific_name}
                                                     </p>
                                                     <div className="flex items-center space-x-4 mt-2">
                                                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                            Care Level: {item.plant.careLevel}
+                                                            Stock: {item.stock_quantity}
                                                         </span>
                                                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                            Light: {item.plant.lightRequirement}
+                                                            {item.in_stock ? 'In Stock' : 'Out of Stock'}
                                                         </span>
                                                     </div>
                                                 </div>
-
                                                 {/* Quantity Controls */}
                                                 <div className="flex items-center space-x-3">
                                                     <button
-                                                        onClick={() => updateQuantity(item.plant.id, item.quantity - 1)}
+                                                        onClick={() => handleQuantityChange(item.cart_id, item.quantity - 1)}
                                                         className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                                        disabled={item.quantity <= 1}
                                                     >
                                                         -
                                                     </button>
@@ -150,26 +129,25 @@ export default function CartPage() {
                                                         {item.quantity}
                                                     </span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.plant.id, item.quantity + 1)}
+                                                        onClick={() => handleQuantityChange(item.cart_id, item.quantity + 1)}
                                                         className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                                                        disabled={item.quantity >= item.stock_quantity}
                                                     >
                                                         +
                                                     </button>
                                                 </div>
-
                                                 {/* Price */}
                                                 <div className="text-right">
                                                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                        ${(item.plant.price * item.quantity).toFixed(2)}
+                                                        ${(Number(item.price) * item.quantity).toFixed(2)}
                                                     </p>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                        ${item.plant.price.toFixed(2)} each
+                                                        ${Number(item.price).toFixed(2)} each
                                                     </p>
                                                 </div>
-
                                                 {/* Remove Button */}
                                                 <button
-                                                    onClick={() => removeFromCart(item.plant.id)}
+                                                    onClick={() => removeFromCart(item.cart_id)}
                                                     className="text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                                                     title="Remove from cart"
                                                 >

@@ -1,35 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CustomerShopLayout } from '@/components/customer/CustomerShopLayout';
 import { ProductCard } from '@/components/customer/ProductCard';
-import { mockPlants } from '@/data/plants';
+import { useWishlist } from '@/hooks/useWishlist';
+import { useCart } from '@/hooks/useCart';
 
 export default function WishlistPage() {
-    // Mock wishlist - in real app this would come from state/API
-    const [wishlistItems, setWishlistItems] = useState([
-        mockPlants[0], // Monstera Deliciosa
-        mockPlants[2], // Fiddle Leaf Fig
-        mockPlants[4], // Peace Lily
-    ]);
+    const { wishlistItems, loading, removeFromWishlist } = useWishlist();
+    const { addToCart } = useCart();
 
-    const removeFromWishlist = (plantId: string) => {
-        setWishlistItems(prev => prev.filter(plant => plant.id !== plantId));
+    const addToCartFromWishlist = async (item: any) => {
+        const success = await addToCart(item.plant_id, 1);
+        if (success) {
+            // Optionally remove from wishlist after adding to cart
+            // await removeFromWishlist(item.plant_id);
+        }
     };
 
-    const addToCart = (plant: any) => {
-        // TODO: Implement actual cart functionality
-        console.log('Adding to cart:', plant);
-        // For now, navigate to cart page
-        window.location.href = '/customer/cart';
+    const moveAllToCart = async () => {
+        for (const item of wishlistItems) {
+            await addToCart(item.plant_id, 1);
+        }
     };
 
-    const moveAllToCart = () => {
-        // TODO: Implement actual cart functionality
-        console.log('Moving all items to cart:', wishlistItems);
-        // Navigate to cart page
-        window.location.href = '/customer/cart';
-    };
+    if (loading) {
+        return (
+            <CustomerShopLayout>
+                <div className="text-center py-12">
+                    <p>Loading wishlist...</p>
+                </div>
+            </CustomerShopLayout>
+        );
+    }
 
     return (
         <CustomerShopLayout>
@@ -55,7 +58,10 @@ export default function WishlistPage() {
                             {wishlistItems.length > 0 && (
                                 <>
                                     <button
-                                        onClick={() => setWishlistItems([])}
+                                        onClick={() => {
+                                            // Clear all wishlist items
+                                            wishlistItems.forEach(item => removeFromWishlist(item.plant_id));
+                                        }}
                                         className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                                     >
                                         Clear All
@@ -90,15 +96,44 @@ export default function WishlistPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {wishlistItems.map((plant) => (
-                            <div key={plant.id} className="relative">
-                                <ProductCard plant={plant} />
+                        {wishlistItems.map((item) => (
+                            <div key={item.wishlist_id} className="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                {/* Product Image */}
+                                <div className="aspect-square bg-gray-200 dark:bg-gray-700">
+                                    <img
+                                        src={item.image}
+                                        alt={item.plant_name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
 
-                                {/* Action buttons overlay */}
+                                {/* Product Details */}
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                                        {item.plant_name}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 italic mb-2">
+                                        {item.scientific_name}
+                                    </p>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="font-bold text-gray-900 dark:text-white">
+                                            ${item.price}
+                                        </span>
+                                        {item.original_price && (
+                                            <span className="text-sm text-gray-500 line-through">
+                                                ${item.original_price}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                        Added {new Date(item.added_at).toLocaleDateString()}
+                                    </p>
+                                </div>
+
+                                {/* Action buttons */}
                                 <div className="absolute top-2 right-2 flex flex-col space-y-2">
-                                    {/* Remove from wishlist button */}
                                     <button
-                                        onClick={() => removeFromWishlist(plant.id)}
+                                        onClick={() => removeFromWishlist(item.plant_id)}
                                         className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors cursor-pointer"
                                         title="Remove from wishlist"
                                     >
@@ -109,31 +144,18 @@ export default function WishlistPage() {
                                 {/* Add to cart button at bottom */}
                                 <div className="absolute bottom-4 left-4 right-4">
                                     <button
-                                        onClick={() => addToCart(plant)}
-                                        className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer shadow-lg"
+                                        onClick={() => addToCartFromWishlist(item)}
+                                        disabled={!item.in_stock}
+                                        className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${item.in_stock
+                                                ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                            }`}
                                     >
-                                        Add to Cart
+                                        {item.in_stock ? 'Add to Cart' : 'Out of Stock'}
                                     </button>
                                 </div>
                             </div>
                         ))}
-                    </div>
-                )}
-
-                {/* Recommendations */}
-                {wishlistItems.length > 0 && (
-                    <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                            You might also like
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {mockPlants
-                                .filter(plant => !wishlistItems.some(w => w.id === plant.id))
-                                .slice(0, 4)
-                                .map((plant) => (
-                                    <ProductCard key={plant.id} plant={plant} />
-                                ))}
-                        </div>
                     </div>
                 )}
             </div>

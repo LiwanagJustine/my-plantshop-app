@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard';
 import { AdminRouteGuard } from '@/components/auth';
 import { useTheme } from '@/context/ThemeContext';
+import { useProductToast } from '@/hooks/useProductToast';
+import { AdminLink } from '@/components/admin/AdminNavigation';
+import AdminPageLoading from '@/components/ui/AdminPageLoading';
 
 interface Product {
     id: number;
@@ -31,6 +34,7 @@ interface Product {
 
 export default function AdminProductsPage() {
     const { theme } = useTheme();
+    const { showProductDeleted, showStockUpdated, showProductError } = useProductToast();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -78,13 +82,68 @@ export default function AdminProductsPage() {
         });
     };
 
+    const getUniqueCategories = () => {
+        const categories = [...new Set(products.map(p => p.category))];
+        return categories.sort();
+    };
+
+    const handleDeleteProduct = async (productId: number) => {
+        const product = products.find(p => p.id === productId);
+        const productName = product?.name || 'Unknown Product';
+
+        if (!confirm(`Are you sure you want to delete "${productName}"?`)) return;
+
+        try {
+            const response = await fetch(`/api/products/${productId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                setProducts(products.filter(p => p.id !== productId));
+                showProductDeleted(productName);
+            } else {
+                showProductError('Failed to delete product. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            showProductError('An error occurred while deleting the product.');
+        }
+    };
+
+    const toggleProductStock = async (productId: number, currentStock: boolean) => {
+        const product = products.find(p => p.id === productId);
+        const productName = product?.name || 'Unknown Product';
+
+        try {
+            const response = await fetch(`/api/products/${productId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ in_stock: !currentStock })
+            });
+
+            if (response.ok) {
+                setProducts(products.map(p =>
+                    p.id === productId ? { ...p, in_stock: !currentStock } : p
+                ));
+                showStockUpdated(productName, !currentStock);
+            } else {
+                showProductError('Failed to update stock status. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error updating stock:', error);
+            showProductError('An error occurred while updating stock status.');
+        }
+    };
+
     if (loading) {
         return (
-            <DashboardLayout>
-                <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-                </div>
-            </DashboardLayout>
+            <AdminRouteGuard>
+                <DashboardLayout>
+                    <AdminPageLoading message="Loading products..." />
+                </DashboardLayout>
+            </AdminRouteGuard>
         );
     }
 
@@ -121,12 +180,13 @@ export default function AdminProductsPage() {
                                 Manage your plant inventory ({products.length} products)
                             </p>
                         </div>
-                        <button
-                            onClick={() => window.location.href = '/admin/products/add'}
+                        <AdminLink
+                            href="/admin/products/add"
                             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                            showLoading={true}
                         >
                             Add New Product
-                        </button>
+                        </AdminLink>
                     </div>
 
                     {/* Products Grid or Empty State */}
@@ -249,6 +309,32 @@ export default function AdminProductsPage() {
                                                 </div>
                                             </div>
                                         )}
+
+                                        {/* Action Buttons */}
+                                        <div className="flex space-x-2 mb-3">
+                                            <AdminLink
+                                                href={`/admin/products/${product.id}/edit`}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
+                                                showLoading={true}
+                                            >
+                                                Edit
+                                            </AdminLink>
+                                            <button
+                                                onClick={() => toggleProductStock(product.id, product.in_stock)}
+                                                className={`px-3 py-1 rounded text-sm transition-colors ${product.in_stock
+                                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                                    : 'bg-green-500 text-white hover:bg-green-600'
+                                                    }`}
+                                            >
+                                                {product.in_stock ? 'Mark Out of Stock' : 'Mark In Stock'}
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteProduct(product.id)}
+                                                className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
 
                                         {/* Footer */}
                                         <div className={`pt-3 border-t text-xs ${theme === 'dark'

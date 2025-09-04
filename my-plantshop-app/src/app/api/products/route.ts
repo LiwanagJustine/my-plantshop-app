@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
 
-        // Simple query parameters
         const category = searchParams.get('category');
         const limit = searchParams.get('limit');
         const inStock = searchParams.get('inStock');

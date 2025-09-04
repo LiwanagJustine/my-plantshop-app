@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import UnauthorizedAccess from './UnauthorizedAccess';
+import AdminLoadingOverlay from '@/components/ui/AdminLoadingOverlay';
 
 interface AdminRouteGuardProps {
     children: React.ReactNode;
@@ -35,10 +36,49 @@ export default function AdminRouteGuard({ children, fallback }: AdminRouteGuardP
                 return;
             }
 
+            // Check if we have a cached admin verification (valid for 5 minutes)
+            const cachedAdminCheck = localStorage.getItem('admin-verified');
+            const cachedTimestamp = localStorage.getItem('admin-verified-time');
+            const cachedUserId = localStorage.getItem('admin-verified-user');
+
+            // Check if this is a direct URL access (more secure)
+            const isDirectAccess = !document.referrer ||
+                !document.referrer.includes(window.location.hostname) ||
+                performance.navigation.type === 1; // TYPE_RELOAD
+
+            // For direct URL access, always verify with server (security)
+            if (isDirectAccess) {
+                console.log('🔒 AdminRouteGuard: Direct URL access detected, performing server verification');
+                // Skip cache for direct access
+            } else if (cachedAdminCheck === 'true' && cachedTimestamp && cachedUserId === user.id?.toString()) {
+                const timeDiff = Date.now() - parseInt(cachedTimestamp);
+                const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+                if (timeDiff < fiveMinutes) {
+                    console.log('🔒 AdminRouteGuard: Using cached admin verification');
+                    setAuthorized(true);
+                    setChecking(false);
+                    return;
+                }
+            }
+
             console.log('🔒 AdminRouteGuard: User found, checking role...');
             console.log('🔒 AdminRouteGuard: Current user role from context:', user.role);
 
-            // Double-check user role from server
+            // If user context already shows admin, trust it initially
+            if (user.role === 'admin') {
+                console.log('🔒 AdminRouteGuard: User context shows admin, granting access');
+                setAuthorized(true);
+                setChecking(false);
+
+                // Cache the verification
+                localStorage.setItem('admin-verified', 'true');
+                localStorage.setItem('admin-verified-time', Date.now().toString());
+                localStorage.setItem('admin-verified-user', user.id?.toString() || '');
+                return;
+            }
+
+            // Double-check user role from server only if context doesn't show admin
             try {
                 console.log('🔒 AdminRouteGuard: Making API call to verify role...');
 
@@ -60,6 +100,10 @@ export default function AdminRouteGuard({ children, fallback }: AdminRouteGuardP
 
                 if (!response.ok) {
                     console.log('🚨 AdminRouteGuard: Auth check failed, redirecting to login');
+                    // Clear cache on auth failure
+                    localStorage.removeItem('admin-verified');
+                    localStorage.removeItem('admin-verified-time');
+                    localStorage.removeItem('admin-verified-user');
                     router.push('/auth/login');
                     return;
                 }
@@ -74,14 +118,27 @@ export default function AdminRouteGuard({ children, fallback }: AdminRouteGuardP
                 if (userRole === 'admin') {
                     console.log('✅ AdminRouteGuard: Admin access granted');
                     setAuthorized(true);
+
+                    // Cache the verification
+                    localStorage.setItem('admin-verified', 'true');
+                    localStorage.setItem('admin-verified-time', Date.now().toString());
+                    localStorage.setItem('admin-verified-user', user.id?.toString() || '');
                 } else {
                     console.log('🚨 AdminRouteGuard: Access denied - user is not admin');
                     console.log('🚨 AdminRouteGuard: User role is:', userRole);
                     setAuthorized(false);
-                }
 
+                    // Clear cache on access denial
+                    localStorage.removeItem('admin-verified');
+                    localStorage.removeItem('admin-verified-time');
+                    localStorage.removeItem('admin-verified-user');
+                }
             } catch (error) {
                 console.error('🚨 AdminRouteGuard: Error checking auth:', error);
+                // Clear cache on error
+                localStorage.removeItem('admin-verified');
+                localStorage.removeItem('admin-verified-time');
+                localStorage.removeItem('admin-verified-user');
                 router.push('/auth/login');
                 return;
             }
@@ -99,12 +156,10 @@ export default function AdminRouteGuard({ children, fallback }: AdminRouteGuardP
     if (loading || checking) {
         console.log('🔒 AdminRouteGuard: Showing loading spinner');
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Verifying access permissions...</p>
-                </div>
-            </div>
+            <AdminLoadingOverlay
+                message="Verifying admin access permissions..."
+                isVisible={true}
+            />
         );
     }
 

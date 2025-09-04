@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/hooks/useCart';
 
 interface CustomerShopTopbarProps {
     onToggleSidebar: () => void;
@@ -9,6 +10,8 @@ interface CustomerShopTopbarProps {
 
 export function CustomerShopTopbar({ onToggleSidebar }: CustomerShopTopbarProps) {
     const { user, logout } = useAuth();
+    const { cartItems } = useCart();
+
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -64,7 +67,7 @@ export function CustomerShopTopbar({ onToggleSidebar }: CustomerShopTopbarProps)
                     >
                         <span className="text-lg">🛒</span>
                         <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
-                            3
+                            {cartItems.length ? cartItems.length : 0}{/* here will be the value for added to cart total */}
                         </span>
                     </a>
 

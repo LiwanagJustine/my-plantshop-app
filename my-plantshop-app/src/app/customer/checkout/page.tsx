@@ -68,7 +68,7 @@ export default function CheckoutPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
-            // TODO: Process order
+            // TODO: Process orders
             console.log('Processing order:', formData);
             alert('Order placed successfully! (This is a demo)');
             window.location.href = '/customer/orders';

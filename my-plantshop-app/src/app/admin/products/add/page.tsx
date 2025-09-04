@@ -1,9 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard';
 import { AdminRouteGuard } from '@/components/auth';
 import { useTheme } from '@/context/ThemeContext';
+import { useProductToast } from '@/hooks/useProductToast';
 import { fetchExchangeRate, convertCurrency, getCurrencySymbol, FALLBACK_USD_TO_PHP } from '@/lib/utils/currency';
 
 interface ProductFormData {
@@ -33,6 +35,7 @@ interface ProductFormData {
 
 export default function AddProductPage() {
     const { theme } = useTheme();
+    const { showProductSuccess, showProductError, showValidationError } = useProductToast();
     const [activeTab, setActiveTab] = useState<'basic' | 'care' | 'additional'>('basic');
     const [currency, setCurrency] = useState<'USD' | 'PHP'>('USD');
     const [exchangeRate, setExchangeRate] = useState(FALLBACK_USD_TO_PHP);
@@ -77,7 +80,7 @@ export default function AddProductPage() {
                 const rate = await fetchExchangeRate();
                 setExchangeRate(rate);
             } catch (error) {
-                console.warn('Using fallback exchange rate');
+                console.warn('Using fallback exchange rate', error);
             } finally {
                 setIsLoadingRate(false);
             }
@@ -120,12 +123,12 @@ export default function AddProductPage() {
         setCurrency(newCurrency);
     };
 
-    const formatCurrencyDisplay = (amount: string | number) => {
-        const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-        if (isNaN(num)) return '';
+    // const formatCurrencyDisplay = (amount: string | number) => {
+    //     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    //     if (isNaN(num)) return '';
 
-        return `${getCurrencySymbol(currency)}${num.toFixed(2)}`;
-    };
+    //     return `${getCurrencySymbol(currency)}${num.toFixed(2)}`;
+    // };
 
     const getConvertedAmount = (amount: string, targetCurrency: 'USD' | 'PHP') => {
         if (!amount) return '';
@@ -226,6 +229,7 @@ export default function AddProductPage() {
         e.preventDefault();
 
         if (!validateForm()) {
+            showValidationError('Please fill in all required fields correctly.');
             return;
         }
 
@@ -312,6 +316,9 @@ export default function AddProductPage() {
             console.log('🌱 Product submission response data:', responseData);
 
             if (response.ok) {
+                const productId = responseData.data?.id;
+                const productName = formData.name;
+
                 // Reset form
                 setFormData({
                     name: '',
@@ -340,19 +347,21 @@ export default function AddProductPage() {
                 setImageFile(null);
                 setImagePreview('');
                 setActiveTab('basic');
-                alert(`Product added successfully! Product ID: ${responseData.data?.id}`);
+
+                // Show success toast with action
+                showProductSuccess(productName, productId);
 
                 // Optionally redirect to products page after successful addition
                 setTimeout(() => {
                     window.location.href = '/admin/products';
-                }, 2000);
+                }, 3000);
             } else {
                 const errorData = responseData || await response.json();
-                alert(`Failed to add product: ${errorData.error || 'Please try again.'}`);
+                showProductError(errorData.error || 'Failed to add product. Please try again.');
             }
         } catch (error) {
             console.error('Error adding product:', error);
-            alert('An error occurred. Please try again.');
+            showProductError('An unexpected error occurred. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -403,7 +412,6 @@ export default function AddProductPage() {
                     {/* Form Container */}
                     <div className={`rounded-xl border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                         <form onSubmit={handleSubmit} className="p-6">
-                            {/* Tab Navigation */}
                             <div className="flex space-x-1 mb-6">
                                 <button
                                     type="button"

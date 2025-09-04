@@ -5,6 +5,8 @@ import { ThemeProvider } from "../context/ThemeContext";
 import { LoadingProvider } from "../context/LoadingContext";
 import { AuthProvider } from "../context/AuthContext";
 import { CurrencyProvider } from "../context/CurrencyContext";
+import { ToastProvider } from "../context/ToastContext";
+import ToastContainer from "../components/ui/ToastContainer";
 import { themeInitScript } from "../lib/utils/theme-hydration";
 import "../lib/utils/devHelpers"; // Dev helper functions
 
@@ -42,7 +44,10 @@ export default function RootLayout({
                     <AuthProvider>
                         <ThemeProvider>
                             <CurrencyProvider>
-                                {children}
+                                <ToastProvider>
+                                    {children}
+                                    <ToastContainer />
+                                </ToastProvider>
                             </CurrencyProvider>
                         </ThemeProvider>
                     </AuthProvider>

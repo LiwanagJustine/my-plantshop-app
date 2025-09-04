@@ -120,7 +120,9 @@ export default function HeaderSection() {
                                 <circle cx="20" cy="19" r="1" />
                             </svg>
                             <span className={`cart-badge absolute -top-1 -right-1 w-4 h-4 text-white text-xs rounded-full flex items-center justify-center font-medium ${theme === 'light' ? 'bg-emerald-600' : 'bg-emerald-500'
-                                }`}>3</span>
+                                }`}>
+                                0 {/* here the value of cart */}
+                            </span>
                         </button>
 
                         {/* Theme Toggle */}

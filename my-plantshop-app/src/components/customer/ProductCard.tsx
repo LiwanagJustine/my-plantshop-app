@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Plant } from '@/types/plant';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
 
 interface ProductCardProps {
     plant: Plant;
@@ -11,19 +13,34 @@ interface ProductCardProps {
 export function ProductCard({ plant }: ProductCardProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [imageError, setImageError] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
-    const handleAddToCart = () => {
-        // TODO: Implement actual cart functionality
-        console.log('Adding to cart:', plant.name);
-        // Navigate to cart page after adding
-        window.location.href = '/customer/cart';
+    const { addToCart } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+    const isWishlisted = isInWishlist(plant.id);
+
+    const handleAddToCart = async () => {
+        setIsAddingToCart(true);
+        try {
+            await addToCart(plant.id, 1);
+        } finally {
+            setIsAddingToCart(false);
+        }
     };
 
-    const handleAddToWishlist = () => {
-        // TODO: Implement actual wishlist functionality
-        console.log('Adding to wishlist:', plant.name);
-        // Navigate to wishlist page after adding
-        window.location.href = '/customer/wishlist';
+    const handleToggleWishlist = async () => {
+        setIsAddingToWishlist(true);
+        try {
+            if (isWishlisted) {
+                await removeFromWishlist(plant.id);
+            } else {
+                await addToWishlist(plant.id);
+            }
+        } finally {
+            setIsAddingToWishlist(false);
+        }
     };
 
     const renderStars = (rating: number) => {
@@ -94,11 +111,14 @@ export function ProductCard({ plant }: ProductCardProps) {
 
                 {/* Wishlist button */}
                 <button
-                    onClick={handleAddToWishlist}
-                    className={`absolute top-2 right-2 p-2 rounded-full bg-white dark:bg-gray-800 shadow-md transition-all duration-300 cursor-pointer ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+                    onClick={handleToggleWishlist}
+                    disabled={isAddingToWishlist}
+                    className={`absolute top-2 right-2 p-2 rounded-full bg-white dark:bg-gray-800 shadow-md transition-all duration-300 cursor-pointer disabled:opacity-50 ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
                         }`}
                 >
-                    <span className="text-red-500 text-lg">♡</span>
+                    <span className={`text-lg ${isWishlisted ? 'text-red-500' : 'text-gray-400'} ${isAddingToWishlist ? 'animate-pulse' : ''}`}>
+                        {isWishlisted ? '♥' : '♡'}
+                    </span>
                 </button>
             </div>
 
@@ -173,13 +193,21 @@ export function ProductCard({ plant }: ProductCardProps) {
                 {/* Add to cart button */}
                 <button
                     onClick={handleAddToCart}
-                    disabled={!plant.inStock}
-                    className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors ${plant.inStock
-                        ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
-                        : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    disabled={!plant.inStock || isAddingToCart}
+                    className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors ${plant.inStock && !isAddingToCart
+                            ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                         }`}
                 >
-                    {plant.inStock ? 'Add to Cart' : 'Out of Stock'}
+                    {isAddingToCart ? (
+                        <span className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Adding...
+                        </span>
+                    ) : plant.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </button>
             </div>
         </div>
