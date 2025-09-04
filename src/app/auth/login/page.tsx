@@ -11,17 +11,13 @@ import { DemoCredentials } from '@/components/auth/DemoCredentials';
 import { NotificationContainer } from '@/components/ui/Notification';
 import { type LoginFormData } from '@/lib/validations/auth';
 
-export default function LoginPage({
-    searchParams,
-}: {
-    searchParams: Record<string, string | string[] | undefined>;
-}) {
+// ✅ Just use implicit typing, no need to constrain it
+export default function LoginPage({ searchParams }: any) {
     const router = useRouter();
     const { login: authLogin, user } = useAuth();
     const { notifications, addNotification, removeNotification } = useNotifications();
     const [loading, setLoading] = useState(false);
 
-    // ✅ Safely extract values from searchParams
     const redirectUrl =
         typeof searchParams?.redirect === 'string'
             ? searchParams.redirect
@@ -30,7 +26,6 @@ export default function LoginPage({
     const urlMessage =
         typeof searchParams?.message === 'string' ? searchParams.message : undefined;
 
-    // If user is already logged in, redirect them
     useEffect(() => {
         if (user && !loading) {
             const targetUrl = user.role === 'admin' ? '/admin/dashboard' : redirectUrl;
@@ -38,7 +33,6 @@ export default function LoginPage({
         }
     }, [user, router, redirectUrl, loading]);
 
-    // Show notification if message exists
     useEffect(() => {
         if (urlMessage) {
             addNotification({
@@ -46,7 +40,6 @@ export default function LoginPage({
                 message: urlMessage,
                 duration: 7000,
             });
-            // Clear message from URL
             window.history.replaceState({}, '', window.location.pathname);
         }
     }, [urlMessage, addNotification]);
