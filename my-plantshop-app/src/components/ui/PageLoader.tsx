@@ -23,11 +23,9 @@ export default function PageLoader({ onLoadingComplete, minLoadingTime = 2000 }:
 
     useEffect(() => {
         const startTime = Date.now();
-        let progressInterval: NodeJS.Timeout;
-        let textInterval: NodeJS.Timeout;
 
         // Progress animation
-        progressInterval = setInterval(() => {
+        const progressInterval: NodeJS.Timeout = setInterval(() => {
             setProgress(prev => {
                 const elapsed = Date.now() - startTime;
                 const targetProgress = Math.min((elapsed / minLoadingTime) * 100, 100);
@@ -46,7 +44,7 @@ export default function PageLoader({ onLoadingComplete, minLoadingTime = 2000 }:
         }, 50);
 
         // Text animation
-        textInterval = setInterval(() => {
+        const textInterval: NodeJS.Timeout = setInterval(() => {
             setLoadingText(prev => {
                 const currentIndex = loadingMessages.indexOf(prev);
                 const nextIndex = (currentIndex + 1) % loadingMessages.length;
@@ -62,8 +60,8 @@ export default function PageLoader({ onLoadingComplete, minLoadingTime = 2000 }:
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${theme === 'light'
-                ? 'bg-gradient-to-br from-emerald-50 via-white to-teal-50'
-                : 'bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/20'
+            ? 'bg-gradient-to-br from-emerald-50 via-white to-teal-50'
+            : 'bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900/20'
             }`}>
             <div className="text-center space-y-8 max-w-md mx-auto px-6">
                 {/* Logo and Plant Animation */}
@@ -71,8 +69,8 @@ export default function PageLoader({ onLoadingComplete, minLoadingTime = 2000 }:
                     <div className={`absolute inset-0 rounded-full blur-3xl opacity-60 animate-pulse ${theme === 'light' ? 'bg-emerald-200/30' : 'bg-emerald-600/20'
                         }`}></div>
                     <div className={`relative backdrop-blur-sm rounded-2xl p-8 border shadow-xl ${theme === 'light'
-                            ? 'bg-white/80 border-emerald-200/50'
-                            : 'bg-slate-800/80 border-emerald-600/30'
+                        ? 'bg-white/80 border-emerald-200/50'
+                        : 'bg-slate-800/80 border-emerald-600/30'
                         }`}>
                         <div className="flex items-center justify-center space-x-3 mb-6">
                             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center animate-bounce">
