@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import pool from '@/lib/db';
 
+// Helper to get ID from URL
+function getIdFromRequest(request: NextRequest) {
+    const urlParts = request.url.split('/');
+    return urlParts[urlParts.length - 2] === '[id]'
+        ? urlParts[urlParts.length - 1]
+        : urlParts[urlParts.length - 2];
+}
+
 // GET - Fetch single product
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { id: string } }
-) {
+export async function GET( request: NextRequest) {
+     const id = getIdFromRequest(request);
     try {
         const client = await pool.connect();
 
@@ -37,7 +43,7 @@ export async function GET(
             WHERE id = $1
         `;
 
-        const result = await client.query(query, [params.id]);
+        const result = await client.query(query, [id]);
         client.release();
 
         if (result.rows.length === 0) {
@@ -64,10 +70,8 @@ export async function GET(
 }
 
 // PUT - Update product (admin only)
-export async function PUT(
-    request: NextRequest,
-    { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
+    const id = getIdFromRequest(request);
     try {
         // Check authentication
         const token = request.cookies.get('auth-token')?.value;
@@ -167,7 +171,7 @@ export async function PUT(
                 JSON.stringify(features || []),
                 isPopular || false,
                 isOnSale || false,
-                params.id
+                id
             ];
 
             const result = await client.query(updateQuery, values);
@@ -204,10 +208,8 @@ export async function PUT(
 }
 
 // DELETE - Delete product (admin only)
-export async function DELETE(
-    request: NextRequest,
-    { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
+    const id = getIdFromRequest(request);
     try {
         // Check authentication
         const token = request.cookies.get('auth-token')?.value;
@@ -248,7 +250,7 @@ export async function DELETE(
 
             // Delete product
             const deleteQuery = 'DELETE FROM plants WHERE id = $1 RETURNING id, name';
-            const result = await client.query(deleteQuery, [params.id]);
+            const result = await client.query(deleteQuery, [id]);
             client.release();
 
             if (result.rows.length === 0) {
