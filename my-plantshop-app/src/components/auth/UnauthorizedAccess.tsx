@@ -29,12 +29,12 @@ export default function UnauthorizedAccess() {
 
     return (
         <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'dark'
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-50 text-gray-900'
+            ? 'bg-gray-900 text-white'
+            : 'bg-gray-50 text-gray-900'
             }`}>
             <div className={`max-w-md w-full text-center p-8 rounded-lg shadow-lg ${theme === 'dark'
-                    ? 'bg-gray-800 border border-gray-700'
-                    : 'bg-white border border-gray-200'
+                ? 'bg-gray-800 border border-gray-700'
+                : 'bg-white border border-gray-200'
                 }`}>
                 {/* Error Icon */}
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
@@ -62,7 +62,7 @@ export default function UnauthorizedAccess() {
                 {/* Error Message */}
                 <p className={`text-lg mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                     }`}>
-                    You don't have permission to access this page.
+                    You don&apos;t have permission to access this page.
                 </p>
 
                 <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
@@ -73,8 +73,8 @@ export default function UnauthorizedAccess() {
                 {/* User Info */}
                 {user && (
                     <div className={`mb-6 p-4 rounded-lg ${theme === 'dark'
-                            ? 'bg-gray-700 border border-gray-600'
-                            : 'bg-gray-100 border border-gray-200'
+                        ? 'bg-gray-700 border border-gray-600'
+                        : 'bg-gray-100 border border-gray-200'
                         }`}>
                         <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                             }`}>
@@ -96,8 +96,8 @@ export default function UnauthorizedAccess() {
                     <button
                         onClick={handleGoBack}
                         className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${theme === 'dark'
-                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}
                     >
                         {user?.role === 'customer' ? 'Go to Dashboard' : 'Go to Home'}
@@ -106,8 +106,8 @@ export default function UnauthorizedAccess() {
                     <button
                         onClick={handleLogout}
                         className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${theme === 'dark'
-                                ? 'bg-gray-600 hover:bg-gray-700 text-gray-200 border border-gray-500'
-                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300'
+                            ? 'bg-gray-600 hover:bg-gray-700 text-gray-200 border border-gray-500'
+                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300'
                             }`}
                     >
                         Switch Account
@@ -116,8 +116,8 @@ export default function UnauthorizedAccess() {
                     <Link
                         href="/"
                         className={`inline-block w-full px-4 py-2 rounded-lg font-medium transition-colors ${theme === 'dark'
-                                ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                            ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                             }`}
                     >
                         Return to Homepage
@@ -126,8 +126,8 @@ export default function UnauthorizedAccess() {
 
                 {/* Security Notice */}
                 <div className={`mt-6 p-3 rounded-lg ${theme === 'dark'
-                        ? 'bg-yellow-900/20 border border-yellow-700/30'
-                        : 'bg-yellow-50 border border-yellow-200'
+                    ? 'bg-yellow-900/20 border border-yellow-700/30'
+                    : 'bg-yellow-50 border border-yellow-200'
                     }`}>
                     <p className={`text-xs ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-700'
                         }`}>

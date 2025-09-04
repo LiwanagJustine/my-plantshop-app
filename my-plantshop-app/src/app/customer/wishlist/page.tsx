@@ -147,8 +147,8 @@ export default function WishlistPage() {
                                         onClick={() => addToCartFromWishlist(item)}
                                         disabled={!item.in_stock}
                                         className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg ${item.in_stock
-                                                ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
-                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                            ? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
+                                            : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                                             }`}
                                     >
                                         {item.in_stock ? 'Add to Cart' : 'Out of Stock'}
